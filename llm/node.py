@@ -4,7 +4,6 @@ from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
 from langchain_google_firestore.vectorstores import FirestoreVectorStore
 from langchain_core.output_parsers import StrOutputParser
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.documents import Document
 
 from dotenv import load_dotenv, find_dotenv
 import os

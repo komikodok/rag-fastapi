@@ -6,7 +6,8 @@ import json
 
 load_dotenv(find_dotenv())
 
-service_key = json.loads(os.getenv("FIRESTORE_SERVICE_KEY"))
+service_key_str = os.getenv("FIRESTORE_SERVICE_KEY")
+service_key = json.loads(service_key_str)
 cred = credentials.Certificate(service_key)
 firebase_admin.initialize_app(cred)
 
