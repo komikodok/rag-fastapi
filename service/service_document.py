@@ -1,41 +1,47 @@
-from fastapi import Depends, UploadFile
+from fastapi import UploadFile
 from langchain_community.document_loaders import DirectoryLoader, UnstructuredFileLoader, UnstructuredURLLoader
 from langchain_text_splitters.character import RecursiveCharacterTextSplitter
 from langchain_google_firestore.vectorstores import FirestoreVectorStore
 from langchain_community.embeddings import FastEmbedEmbeddings
 
-from typing import List
-import os
 import shutil
 from pathlib import Path
+import os
 
 
-BASE_DIR = Path(__file__).resolve().parent
-UPLOAD_DIR = "/documents"
+BASE_DIR = Path(__file__).resolve().parent.parent
+UPLOAD_DIR = BASE_DIR / "documents"
+
+if not UPLOAD_DIR.exists():
+    os.makedirs(UPLOAD_DIR)
 
 class ServiceDocument:
 
     def __init__(self):
         self.__documents = None
 
-    def save_file(self, upload_file: List[UploadFile]) -> None:
-        for file in upload_file:
-            file_path = os.path.join(BASE_DIR / UPLOAD_DIR, file.filename)
+    def save_file(self, upload_file: UploadFile) -> None:
+        file_path = UPLOAD_DIR / upload_file.filename
 
-            with open(file_path, "wb") as f:
-                shutil.copyfileobj(file.file, f)
+        with open(file_path, "wb") as f:
+            shutil.copyfileobj(upload_file.file, f)
+        
+    async def delete_file(self, filename: str) -> None:
+        file_path = UPLOAD_DIR / filename
+        if file_path.exists():
+            await file_path.unlink()
+        else:
+            raise FileNotFoundError(f"File {file_path} is not found in {UPLOAD_DIR}")
 
-    def delete_file(self):
-        pass
-
-    def load_knowledge_from_file(self, path: str = "../documents/") -> "ServiceDocument":
+    def load_knowledge_from_file(self) -> "ServiceDocument":
         loader = DirectoryLoader(
-            path, 
-            glob="*.{pdf, txt, doc, md}",
+            UPLOAD_DIR, 
+            glob=["*.pdf", "*.txt", "*.docx", "*.md"],
             recursive=True,
             loader_cls=UnstructuredFileLoader
         )
         self.__documents = loader.load()
+        print(f"Document: {self.__documents}")
         return self
     
     def load_knowledge_from_url(self, *url_args: str) -> "ServiceDocument":

@@ -1,9 +1,7 @@
-from fastapi import APIRouter, Depends, File, UploadFile
+from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, status
+from fastapi.responses import Response
 
 from typing import List
-import os
-import shutil
-from pathlib import Path
 from service.service_document import ServiceDocument
 
 
@@ -14,4 +12,17 @@ def store_file(
     files: List[UploadFile] = File(),
     service_document: ServiceDocument = Depends()
 ):
-    pass
+    try:
+        for file in files:
+            print(f"File: {file}")
+            service_document.save_file(file)
+
+        document = service_document.load_knowledge_from_file()
+        document.store_documents()
+
+        # for file in files:
+        #     service_document.delete_file(file.filename)
+    except Exception as e:
+        print(f"Error: {e}")
+    
+    return Response("Success store knowledge to vectorstore", media_type="text/plain")
