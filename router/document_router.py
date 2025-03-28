@@ -14,7 +14,6 @@ def store_file(
 ):
     try:
         for file in files:
-            print(f"File: {file}")
             service_document.save_file(file)
 
         document = service_document.load_knowledge_from_file()
@@ -23,6 +22,6 @@ def store_file(
         # for file in files:
         #     service_document.delete_file(file.filename)
     except Exception as e:
-        print(f"Error: {e}")
+        return e
     
     return Response("Success store knowledge to vectorstore", media_type="text/plain")

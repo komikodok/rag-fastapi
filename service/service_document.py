@@ -1,4 +1,4 @@
-from fastapi import UploadFile
+from fastapi import UploadFile, HTTPException
 from langchain_community.document_loaders import DirectoryLoader, UnstructuredFileLoader, UnstructuredURLLoader
 from langchain_text_splitters.character import RecursiveCharacterTextSplitter
 from langchain_google_firestore.vectorstores import FirestoreVectorStore
@@ -7,6 +7,7 @@ from langchain_community.embeddings import FastEmbedEmbeddings
 import shutil
 from pathlib import Path
 import os
+from datetime import timedelta
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -59,14 +60,22 @@ class ServiceDocument:
         
         text_splitter = RecursiveCharacterTextSplitter(
             separators=["\n\n"],
-            chunk_size=1000,
+            chunk_size=500,
             chunk_overlap=100
         )
         chunk = text_splitter.split_documents(documents=self.__documents)
         embeddings = FastEmbedEmbeddings()
-        return FirestoreVectorStore.from_documents(
-            chunk, 
-            embedding=embeddings,
-            collection="document_embeddings"
-        )
+        try:
+            vector_store = FirestoreVectorStore.from_documents(
+                chunk, 
+                embedding=embeddings,
+                collection="document_embeddings",
+                request_timeout=timedelta(minutes=1)
+            )
+            return vector_store
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to store documents: {str(e)}"
+            )
     
