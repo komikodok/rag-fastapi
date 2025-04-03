@@ -8,7 +8,6 @@ import shutil
 from pathlib import Path
 import os
 from dotenv import load_dotenv, find_dotenv
-from logger import logger
 
 load_dotenv(find_dotenv())
 
@@ -16,7 +15,6 @@ load_dotenv(find_dotenv())
 BASE_DIR = Path(__file__).resolve().parent.parent
 UPLOAD_DIR = BASE_DIR / "documents"
 
-# DATABASE_URL = os.getenv("DATABASE_URL")
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 if not UPLOAD_DIR.exists():
@@ -41,7 +39,6 @@ class ServiceDocument:
             raise FileNotFoundError(f"File {file_path} is not found in {UPLOAD_DIR}")
 
     def load_knowledge_from_file(self) -> "ServiceDocument":
-        logger.info(f"\n Load knowledge \n")
         loader = DirectoryLoader(
             UPLOAD_DIR, 
             glob="*.pdf",
@@ -64,7 +61,6 @@ class ServiceDocument:
         return self
     
     def store_documents(self):
-        logger.info(f"Store documents \n")
         if not self.__documents:
             raise TypeError("Document must be List[Document]")
         
@@ -73,24 +69,17 @@ class ServiceDocument:
             chunk_size=500,
             chunk_overlap=100
         )
-        logger.info(f"Text splitter: {text_splitter}\n")
-        logger.info(f"Documents: {self.__documents[0].page_content} \n")
         chunk = text_splitter.split_documents(documents=self.__documents)
-        logger.info(f"Chunk: {chunk[0].page_content} \n")
         embeddings = FastEmbedEmbeddings()
-        logger.info(f"Embeddings: {embeddings} \n")
         try:
-            logger.info("Test\n")
-            vector_store = PGVector.from_documents(
+            PGVector.from_documents(
                 chunk,
                 embedding=embeddings,
                 collection_name="document_embeddings",
                 connection=DATABASE_URL
             )
-            logger.info(f"Vector store: {vector_store}")
-            return vector_store
+            return None
         except Exception as e:
-            logger.info(f"Failed to store documents: {e}")
             raise HTTPException(
                 status_code=500,
                 detail=f"Failed to store documents: {str(e)}"
