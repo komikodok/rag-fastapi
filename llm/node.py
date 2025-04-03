@@ -35,7 +35,7 @@ def retrieve_node(state: State):
 
 def generation_node(state: State):
     question = state.get("question")
-    document = state.get("document")
+    document = state.get("document", "")
     message_history = state.get("message_history", [])
 
     if not isinstance(message_history, list):

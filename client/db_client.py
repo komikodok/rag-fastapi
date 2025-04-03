@@ -1,17 +1,22 @@
-import firebase_admin
-from firebase_admin import firestore, credentials
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 import os
-from dotenv import load_dotenv, find_dotenv
-import json
+from dotenv import find_dotenv, load_dotenv
 
 load_dotenv(find_dotenv())
 
-service_key_str = os.getenv("FIRESTORE_SERVICE_KEY")
-service_key = json.loads(service_key_str)
-cred = credentials.Certificate(service_key)
-firebase_admin.initialize_app(cred)
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-db = firestore.client()
+engine = create_engine(DATABASE_URL)
+
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+Base = declarative_base()
 
 def get_db():
-    return db
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
