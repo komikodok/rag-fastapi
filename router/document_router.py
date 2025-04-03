@@ -7,7 +7,7 @@ from service.service_document import ServiceDocument
 
 document_router = APIRouter(prefix="/api")
 
-@document_router.post("/store-file", summary="Store your document file")
+@document_router.post("/store-file", summary="Store your document file", tags=["Documents"])
 def store_file(
     files: List[UploadFile] = File(max_size=10_000_000),
     service_document: ServiceDocument = Depends()

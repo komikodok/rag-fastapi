@@ -1,7 +1,7 @@
 from langchain_core.pydantic_v1 import Field, BaseModel
 from langchain_groq.chat_models import ChatGroq
 from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
-from langchain_google_firestore.vectorstores import FirestoreVectorStore
+from langchain_postgres.vectorstores import PGVector
 from langchain_core.output_parsers import StrOutputParser
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 
@@ -9,7 +9,6 @@ from dotenv import load_dotenv, find_dotenv
 import os
 
 from .state import State
-from client.db_client import db
 
 load_dotenv(find_dotenv())
 
@@ -18,10 +17,12 @@ model_name = os.getenv("MODEL_NAME")
 llm = ChatGroq(model=model_name, api_key=groq_api_key)
 embeddings = FastEmbedEmbeddings()
 
-vectorstore = FirestoreVectorStore(
-    client=db,
-    collection="document_embeddings",
-    embedding_service=embeddings
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+vectorstore = PGVector(
+    connection=os.getenv("DATABASE_URL"),
+    embeddings=embeddings,
+    collection_name="langchain_pg_embedding"
 )
 retriever = vectorstore.as_retriever()
 
