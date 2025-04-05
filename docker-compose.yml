@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  restapi:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: restapi
+    ports:
+      - 8000:8000
+    environment:
+      - MODEL_NAME=${MODEL_NAME}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - DATABASE_URL=${DATABASE_URL}
