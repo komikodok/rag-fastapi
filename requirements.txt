@@ -91,8 +91,7 @@ protobuf==5.29.4
 psutil==7.0.0
 psycopg==3.2.6
 psycopg-pool==3.2.6
-psycopg2==2.9.10
-psycopg2-binary==2.9.10
+psycopg[binary]==3.2.6
 py_rust_stemmers==0.1.5
 pyasn1==0.6.1
 pyasn1_modules==0.4.1
