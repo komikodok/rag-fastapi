@@ -3,7 +3,8 @@ FROM python:3.10-slim
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     build-essential \
-    libpq5 \
+    gcc \
+    libpq-dev \
     python3-dev \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
@@ -11,8 +12,10 @@ RUN apt-get update && \
 WORKDIR /usr/src/app
 
 COPY requirements.txt ./
-RUN pip install -r requirements.txt
 
+RUN pip install --upgrade pip && \
+    pip install psycopg2-binary && \
+    pip install -r requirements.txt 
 COPY . .
 
 EXPOSE 8000
