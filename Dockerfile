@@ -14,7 +14,6 @@ WORKDIR /usr/src/app
 COPY requirements.txt ./
 
 RUN pip install --upgrade pip && \
-    pip install psycopg2-binary && \
     pip install -r requirements.txt 
 COPY . .
 
